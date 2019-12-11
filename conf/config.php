@@ -88,14 +88,17 @@ $config['bet_maximum_allowed_amount'] = 1000; // 0 for unlimited max amount
 $config['betstart_announcement_message'] = 'Bet is open!';
 $config['betend_announcement_message'] = 'Bet has ended.';
 $config['bet_accept_period_over_announcement_message'] = 'Bet period is over, no more bets will be accepted.';
-$config['bet_help_message'] = 'Betting work => !bet <Value to bet> <Chocolegumes amount bet cost> | Place a bet on value <Value to bet> for <Chocolegumes amount bet cost> to win more Chocolegumes points. Example : !bet 41 150 where 41 is the order of Chocobo number 4 in first and 1 in second for 150 Chocolegumes.';
+$config['bet_help_message'] = 'Betting work => !bet <Value to bet> <ChocoKWEH amount bet cost> | 
+Place a bet on value <Value to bet> for <ChocoKWEH amount bet cost> to win more ChocoKWEH points. 
+Example : !bet 41 150 where 41 is the order of Chocobo number 4 in first and 1 in second for 150 ChocoKWEH. 
+List of possible bet : 12 13 14 15 16 23 24 25 26 34 35 36 45 46 56';
 
 
 // loyalty config:
 // 
 // how many points a viewers is awarded per check interval. if you set it to 0, feature is disabled:
 $config['loyalty_points_per_interval'] = 5;
-$config['loyalty_currency'] = 'Chocolegumes';
+$config['loyalty_currency'] = 'ChocoKWEH';
 $config['loyalty_check_interval'] = 120; // in seconds
 $config['loyalty_points_welcome_award'] = 1000; // amount of LP awarded to new viewers
-$config['loyaltypoints_keyword'] = '!chocolegumes';
+$config['loyaltypoints_keyword'] = '!chocokweh';

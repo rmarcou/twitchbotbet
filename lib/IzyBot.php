@@ -2345,8 +2345,11 @@ class IzyBot {
             //
             if (preg_match('/^[0-9]+$/', $words_in_message_text[1], $matches) != 1)
             {
-                $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
-                return FALSE;
+                $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
+                if (!in_array($words_in_message_text[1], $bet_possible_options)) {
+                    $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
+                    return FALSE;
+                }
             }
             $betting_option = $words_in_message_text[1];
             //
