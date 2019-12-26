@@ -2207,7 +2207,8 @@ class IzyBot {
             $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : There is no active bet to stop.');
         }
         else
-        {            
+        {
+            //TODO CHECKER LE RESULTAT
             if (count($words_in_message_text) === 1)
             {
                 $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : To end the bet, type: ' . $this->bot_config['admin_endbet_keyword'] . ' <winning option in numerical format>');
@@ -2216,74 +2217,79 @@ class IzyBot {
             {
                 if (preg_match('/^[0-9]+$/', $words_in_message_text[1], $matches) === 1)
                 {
-                    $this->bet_winning_option = $words_in_message_text[1];
+                    $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
+                    if (!in_array($words_in_message_text[1], $bet_possible_options)) {
+                        $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option), rejecting it.');
+                    }else{
+                        $this->bet_winning_option = $words_in_message_text[1];
 
-                    // stats initialization:
-                    $stats_total_bets = 0;
-                    $stats_winners_total = 0;
-                    $stats_losers_total = 0;
-                    $stats_total_bet_amount = 0;
-                    $stats_total_bet_won_amount = 0;
-                    $stats_total_bet_lost_amount = 0;
-                    
-                    $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Stopping the bet, winning option: ' . $this->bet_winning_option);
-                    $this->bet_currently_running = FALSE;
-                    $this->bet_end_time = date('U');
-                    //
-                    // parse the bets_array, award viewers
-                    foreach ($this->bets_array as $bet)
-                    {
-                        $stats_total_bet_amount += $bet['amount'];
-                        $stats_total_bets++;
+                        // stats initialization:
+                        $stats_total_bets = 0;
+                        $stats_winners_total = 0;
+                        $stats_losers_total = 0;
+                        $stats_total_bet_amount = 0;
+                        $stats_total_bet_won_amount = 0;
+                        $stats_total_bet_lost_amount = 0;
 
-                        $key_for_username = array_search($username, array_column($this->loyalty_viewers_XP_array, 'username'));
-                        if ($key_for_username === FALSE)
+                        $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Stopping the bet, winning option: ' . $this->bet_winning_option);
+                        $this->bet_currently_running = FALSE;
+                        $this->bet_end_time = date('U');
+                        //
+                        // parse the bets_array, award viewers
+                        foreach ($this->bets_array as $bet)
                         {
-                            $this->logger->log_it('ERROR', __CLASS__, __FUNCTION__, 'Could not process the bet for username: ' . $username . ', username not found in loyalty points array (shouldnt have happened!).');
-                            GOTO ENDOFBETPROCESSINGLOOP;
+                            $stats_total_bet_amount += $bet['amount'];
+                            $stats_total_bets++;
+
+                            $key_for_username = array_search($username, array_column($this->loyalty_viewers_XP_array, 'username'));
+                            if ($key_for_username === FALSE)
+                            {
+                                $this->logger->log_it('ERROR', __CLASS__, __FUNCTION__, 'Could not process the bet for username: ' . $username . ', username not found in loyalty points array (shouldnt have happened!).');
+                                GOTO ENDOFBETPROCESSINGLOOP;
+                            }
+                            //
+                            if ($bet['option'] === $this->bet_winning_option)
+                            {
+                                $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + $bet['amount'];
+                                //$this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + ($bet['amount']*2);
+                                $stats_winners_total++;
+                                $stats_total_bet_won_amount += $bet['amount'];
+                                $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she WON: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
+                            }
+                            else
+                            {
+                                $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] - $bet['amount'];
+                                $stats_losers_total++;
+                                $stats_total_bet_lost_amount += $bet['amount'];
+                                $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she LOST: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
+                            }
+                            ENDOFBETPROCESSINGLOOP:
                         }
-                        //                        
-                        if ($bet['option'] === $this->bet_winning_option)
-                        {
-                            $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + $bet['amount'];
-                            //$this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + ($bet['amount']*2);
-                            $stats_winners_total++;
-                            $stats_total_bet_won_amount += $bet['amount'];
-                            $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she WON: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
-                        }
-                        else
-                        {
-                            $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] - $bet['amount'];
-                            $stats_losers_total++;
-                            $stats_total_bet_lost_amount += $bet['amount'];
-                            $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she LOST: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
-                        }
-                        ENDOFBETPROCESSINGLOOP:
+                        $bet_single_plural = ($stats_total_bets > 1 || $stats_total_bets === 0) ? 'bets' : 'bet';
+                        $winners_single_plural = ($stats_winners_total > 1 || $stats_winners_total === 0) ? 'winners' : 'winner';
+                        $losers_single_plural = ($stats_losers_total > 1 || $stats_losers_total === 0) ? 'viewers' : 'viewer';
+                        //
+                        //
+                        $this->_write_bet_results('Completed',
+                            $stats_total_bets,
+                            $stats_winners_total,
+                            $stats_losers_total,
+                            $stats_total_bet_amount,
+                            $stats_total_bet_won_amount,
+                            $stats_total_bet_lost_amount
+                        );
+                        // reset vars:
+                        $this->bet_description = '';
+                        $this->bet_currently_running = FALSE;
+                        $this->bet_currently_accepting = FALSE;
+                        $this->bets_array = array();
+                        $this->bet_start_time = NULL;
+                        $this->bet_end_time = NULL;
+                        $this->bet_accept_end_time = NULL;
+                        $this->bet_winning_option = NULL;
+                        //
+                        $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : ' . $this->bot_config['betend_announcement_message'] . ' There were ' . $stats_total_bets . ' ' . $bet_single_plural . ' in total placed, for a total bet amount of: ' . $stats_total_bet_amount . ' ' . $this->loyalty_currency . '. We had ' . $stats_winners_total . ' '  . $winners_single_plural . ' who earned a total of ' . $stats_total_bet_won_amount . ' ' . $this->loyalty_currency . ', and ' . $stats_losers_total . ' ' . $losers_single_plural . ' who had to say goodbye to a total of ' . $stats_total_bet_lost_amount . ' ' . $this->loyalty_currency . '.');
                     }
-                    $bet_single_plural = ($stats_total_bets > 1 || $stats_total_bets === 0) ? 'bets' : 'bet';
-                    $winners_single_plural = ($stats_winners_total > 1 || $stats_winners_total === 0) ? 'winners' : 'winner';
-                    $losers_single_plural = ($stats_losers_total > 1 || $stats_losers_total === 0) ? 'viewers' : 'viewer';
-                    //
-                    //
-                    $this->_write_bet_results('Completed',
-                    $stats_total_bets,
-                    $stats_winners_total,
-                    $stats_losers_total,
-                    $stats_total_bet_amount,
-                    $stats_total_bet_won_amount,
-                    $stats_total_bet_lost_amount
-                    );
-                    // reset vars:
-                    $this->bet_description = '';
-                    $this->bet_currently_running = FALSE;
-                    $this->bet_currently_accepting = FALSE;
-                    $this->bets_array = array();                    
-                    $this->bet_start_time = NULL;
-                    $this->bet_end_time = NULL;
-                    $this->bet_accept_end_time = NULL;
-                    $this->bet_winning_option = NULL;
-                    //
-                    $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : ' . $this->bot_config['betend_announcement_message'] . ' There were ' . $stats_total_bets . ' ' . $bet_single_plural . ' in total placed, for a total bet amount of: ' . $stats_total_bet_amount . ' ' . $this->loyalty_currency . '. We had ' . $stats_winners_total . ' '  . $winners_single_plural . ' who earned a total of ' . $stats_total_bet_won_amount . ' ' . $this->loyalty_currency . ', and ' . $stats_losers_total . ' ' . $losers_single_plural . ' who had to say goodbye to a total of ' . $stats_total_bet_lost_amount . ' ' . $this->loyalty_currency . '.');
                 }
                 else
                 {
@@ -2347,7 +2353,8 @@ class IzyBot {
             {
                 $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
                 if (!in_array($words_in_message_text[1], $bet_possible_options)) {
-                    $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
+                    //$this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
+                    $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option), rejecting it.');
                     return FALSE;
                 }
             }
