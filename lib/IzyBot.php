@@ -99,10 +99,10 @@ class IzyBot {
     public function __construct($config)
     {
         $this->start_timestamp = date('U');
-        
+
         $this->bot_config = $config;
         $this->bot_config['botinfocommand_keyword'] = '!botinfo';
-        
+
         // twitch info:
         $this->hostname = 'irc.twitch.tv';
         $this->port = 6667;
@@ -129,15 +129,15 @@ class IzyBot {
         $this->nickname = $config['nickname'];
         $this->channel = '#' . $config['channel'];
         $this->bot_name = $config['bot_name'];
-        
+
         // admin commands:
         $this->admin_commands_file = 'admin_commands.cfg';
         $this->admin_commands_nonsafe_file = 'admin_commands_nonsafe.cfg';
         $this->admin_commands = array();
         $this->admin_commands_nonsafe = array();
         $this->admin_commands_reserved_names = array($config['admin_addcommand_keyword'],
-                                                     $config['admin_editcommand_keyword'], 
-                                                     $config['admin_removecommand_keyword'], 
+                                                     $config['admin_editcommand_keyword'],
+                                                     $config['admin_removecommand_keyword'],
                                                      $config['admin_addadmin_keyword'],
                                                      $config['admin_removeadmin_keyword'],
                                                      $config['admin_addperiodicmsg_keyword'],
@@ -161,7 +161,7 @@ class IzyBot {
                                                      $config['bet_place_keyword'],
                                                      $this->bot_config['botinfocommand_keyword']
         );
-        
+
         // bot commands usage stats:
         $this->bot_commands_usage_file = 'bot_commands_usage_stats.cfg';
         $this->bot_commands_usage = array();
@@ -178,7 +178,7 @@ class IzyBot {
         $this->periodic_messages_file = 'periodic_messages.cfg';
         $this->periodic_messages_last_message_sent_index = -1;
         $this->periodic_messages_interval_seconds = $config['periodic_messages_interval_seconds'];
-        
+
         // quotes:
         $this->quotes_file = 'quotes.cfg';
         //
@@ -217,7 +217,7 @@ class IzyBot {
         {
             $this->loyalty_commands = array();
         }
-        
+
         //
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, $this->bot_name . "'s initialization is complete!" . "\n");
     }
@@ -235,7 +235,7 @@ class IzyBot {
         //     $this->log_it('ERROR', __CLASS__, __FUNCTION__, 'Unable to set option on socket: ' . socket_strerror(socket_last_error($this->socket)));
         // }
         socket_clear_error($this->socket);
-        
+
         if (socket_connect($this->socket, $this->hostname, $this->port) === FALSE)
         {
             $this->log_it('ERROR', __CLASS__, __FUNCTION__, 'Could not open connection to server: ' . $this->hostname . ', port: ' . $this->port);
@@ -281,7 +281,7 @@ class IzyBot {
         {
             $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Bot on listen_only mode or command not needed for service. Supressing it.');
             return TRUE;
-        }        
+        }
     }
     //----------------------------------------------------------------------------------
     //
@@ -349,7 +349,7 @@ class IzyBot {
                         $this->_log_irc_traffic('<-- | ' . $line); // delete last char, its NewLine.
                         $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, '<-- | ' . $line); // delete last char, its Newline.
                         $this->_process_irc_incoming_message($line);
-                    }                    
+                    }
                 }
                 //-------------------
                 //
@@ -373,7 +373,7 @@ class IzyBot {
             echo __CLASS__ . ': Attempting to reconnect in 15 seconds..' . "\n";
             $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Attempting to reconnect in 15 seconds..');
             sleep(15);
-            //  
+            //
         }
         //
         return $this;
@@ -431,12 +431,12 @@ class IzyBot {
     {
         $message_text = preg_replace('/\s+/', ' ', trim($message_text));
         $words_in_message_text = explode(' ', $message_text);
-        
+
         // $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'words_in_message_text:' . "\n\n" . print_r($words_in_message_text, true) . "\n\n");
 
         // -----------------------------------------
         // commands for admins START
-        if ($this->_check_user_is_admin($username) === TRUE) 
+        if ($this->_check_user_is_admin($username) === TRUE)
         {
             if ($words_in_message_text[0] === $this->bot_config['admin_addcommand_keyword']) // Add admin command check
             {
@@ -629,7 +629,7 @@ class IzyBot {
             }
         }
         //
-        // commands for admins END 
+        // commands for admins END
         // -----------------------------------------
         // commands for all users START
         if ($message_text === $this->bot_config['helpcommand_keyword'])
@@ -704,7 +704,7 @@ class IzyBot {
                 {
                     $response = $this->_run_eval_text($html_code, $words_in_message_text);
                     // var_dump($response);
-                    
+
                     //
                     $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Received command (nonsafe): ' . $command . ', replying it with: ' . $response);
                     //
@@ -720,7 +720,7 @@ class IzyBot {
                     {
                         $this->send_text_to_server('bot', 'PRIVMSG ' . $channel . ' : ' . $response);
                     }
-                    //                       
+                    //
                     $this->_add_command_to_bot_responses_last_date($command);
                 }
                 // add the bot command to usage:
@@ -749,7 +749,7 @@ class IzyBot {
                     {
                         $this->send_text_to_server('bot', 'PRIVMSG ' . $channel . ' : ' . $response);
                     }
-                    //                       
+                    //
                     $this->_add_command_to_bot_responses_last_date($command);
                 }
                 // add the bot command to usage:
@@ -758,7 +758,7 @@ class IzyBot {
             }
         }
         //
-        // commands for all users END 
+        // commands for all users END
         // -----------------------------------------
         //
         return TRUE;
@@ -803,7 +803,7 @@ class IzyBot {
             $this->admin_commands = array();
         }
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bot admin commands loaded:' . "\n\n" . print_r($this->admin_commands, true) . "\n\n");
-        
+
         // admin commands nonsafe:
 
         $admin_commands_nonsafe_text = $this->appdatahandler->ReadAppDatafile($this->admin_commands_nonsafe_file, 'READ');
@@ -822,7 +822,7 @@ class IzyBot {
             $this->admin_commands_nonsafe = array();
         }
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bot admin commands (nonsafe) loaded:' . "\n\n" . print_r($this->admin_commands_nonsafe, true) . "\n\n");
-        
+
         return TRUE;
     }
     //----------------------------------------------------------------------------------
@@ -849,7 +849,7 @@ class IzyBot {
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bot admin usernames loaded:' . "\n\n" . print_r($this->admin_usernames, true) . "\n\n");
 
         return TRUE;
-        
+
     }
     //----------------------------------------------------------------------------------
     //
@@ -955,7 +955,7 @@ class IzyBot {
     //----------------------------------------------------------------------------------
     private function _write_periodic_messages()
     {
-        
+
         $this->appdatahandler->WriteAppDatafile($this->periodic_messages_file, 'appdata', json_encode($this->periodic_messages), 'WRITE');
 
         return TRUE;
@@ -966,7 +966,7 @@ class IzyBot {
     //----------------------------------------------------------------------------------
     private function _write_quotes()
     {
-        
+
         $this->appdatahandler->WriteAppDatafile($this->quotes_file, 'appdata', json_encode($this->quotes), 'WRITE');
 
         return TRUE;
@@ -977,7 +977,7 @@ class IzyBot {
     //----------------------------------------------------------------------------------
     private function _write_loyalty_viewers_XP()
     {
-        
+
         $this->appdatahandler->WriteAppDatafile($this->loyalty_viewers_XP_file, 'appdata', json_encode($this->loyalty_viewers_XP_array), 'WRITE');
 
         return TRUE;
@@ -1191,7 +1191,7 @@ class IzyBot {
     private function _remove_periodic_message($username, $channel, $words_in_message_text, $message_text)
     {
         $periodic_message = implode(' ', array_slice($words_in_message_text, 1));
-        //        
+        //
         if (array_search($periodic_message, $this->periodic_messages) !== FALSE)
         {
             unset($this->periodic_messages[array_search($periodic_message, $this->periodic_messages)]);
@@ -1215,7 +1215,7 @@ class IzyBot {
     private function _remove_quote($username, $channel, $words_in_message_text, $message_text)
     {
         $message_response = NULL;
-            
+
         if (count($words_in_message_text) > 1)
         {
             if (preg_match('/^[0-9]+$/', $words_in_message_text[1], $matches) === 1)
@@ -1233,10 +1233,10 @@ class IzyBot {
             $message_response = 'The numeric id of the quote is expected to complete this command.';
             GOTO ENDOFREMOVEQUOTE;
         }
-        
+
         //
         $key_id = NULL;
-        
+
         foreach ($this->quotes as $array_key => $quote)
         {
             if ($quote['id'] == $requested_quote_id)
@@ -1244,7 +1244,7 @@ class IzyBot {
                 $key_id = $array_key;
             }
         }
-        
+
         if ($key_id !== NULL)
         {
             unset($this->quotes[$key_id]);
@@ -1257,7 +1257,7 @@ class IzyBot {
             $this->send_text_to_server('bot', 'PRIVMSG ' . $channel . ' : Quote #' . $requested_quote_id . ' was not found.');
             return FALSE;
         }
-        // 
+        //
         ENDOFREMOVEQUOTE:
         if ($message_response !== NULL)
         {
@@ -1357,7 +1357,7 @@ class IzyBot {
             // check if quote # was included:
 
             $requested_quote_id = NULL;
-            
+
             if (count($words_in_message_text) > 1)
             {
                 if (preg_match('/^[0-9]+$/', $words_in_message_text[1], $matches) === 1)
@@ -1370,7 +1370,7 @@ class IzyBot {
                     GOTO ENDDISPLAYQUOTEQUOTE;
                 }
             }
-            
+
             //
             if ($requested_quote_id === NULL)
             {
@@ -1464,7 +1464,7 @@ class IzyBot {
     //----------------------------------------------------------------------------------
     private function _check_and_send_periodic_message()
     {
-        if ($this->periodic_messages_interval_seconds > 0 && 
+        if ($this->periodic_messages_interval_seconds > 0 &&
             date('U') - $this->periodic_messages_last_date_sent > $this->periodic_messages_interval_seconds &&
             count($this->periodic_messages) > 0
             )
@@ -1500,7 +1500,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _create_poll($username, $channel, $words_in_message_text, $message_text)
     {
@@ -1531,7 +1531,7 @@ class IzyBot {
                 $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : Invalid poll duration: ' . $words_in_message_text[1]);
                 return FALSE;
             }
-            
+
 
         }
     }
@@ -1550,7 +1550,7 @@ class IzyBot {
         {
             $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Poll cancellation command was valid. Cancelling current poll..');
             $this->active_poll_exists = FALSE;
-            
+
             // no need to write poll results to file..
 
             $this->poll_question = NULL;
@@ -1613,7 +1613,7 @@ class IzyBot {
         {
             $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Poll deadline date was reached. Closing current poll..');
             $this->active_poll_exists = FALSE;
-            
+
             $poll_results = array();
             $votes_count = count($this->votes_array);
             //
@@ -1640,7 +1640,7 @@ class IzyBot {
                 foreach ($poll_results as $poll_result => $poll_count)
                 {
                     $vote_text = ($poll_count === 1) ? 'vote' : 'votes';
-                    
+
                     if ($current_row === 0)
                     {
                         $results_text .= ' option ' . $poll_result . ': ' . $poll_count . ' ' . $vote_text . ' (' . intval((100*$poll_count)/$votes_count) . '%) ';
@@ -1672,9 +1672,9 @@ class IzyBot {
     {
         $poll_results_file = 'Poll_results__' . date('Ymd_H_i') . '.txt';
         //
-        // $text_to_file = "Poll description: " . $this->poll_question . "\n\n" . 
-        // "Poll result: " . $results_text . "\n\n" . 
-        // "Votes: " . "\n\n" . json_encode($this->votes_array) . "\n\n";        
+        // $text_to_file = "Poll description: " . $this->poll_question . "\n\n" .
+        // "Poll result: " . $results_text . "\n\n" .
+        // "Votes: " . "\n\n" . json_encode($this->votes_array) . "\n\n";
         //
 
         $poll_results_array = array( 'Poll description' => $this->poll_question,
@@ -1703,7 +1703,7 @@ class IzyBot {
 
                 eval('$ret_text = ' . $matches[3] . ';');
                 return $matches[1] . $ret_text . $matches[4];
-                
+
             }
             else
             {
@@ -1711,9 +1711,9 @@ class IzyBot {
                 eval('$ret_text = ' . $matches[3] . ';');
                 return $matches[1] . $ret_text . $matches[4];
             }
-            
-            
-            
+
+
+
         }
         else
         {
@@ -1730,12 +1730,12 @@ class IzyBot {
         if (preg_match('/^(.*)?(PHPFUNC(.*)PHPFUNC)(.*)?$/i', $command_text, $matches) === 1)
         {
             // var_dump($matches);
-            
+
             // ---------------- Find if it includes $1:
             if (preg_match('/^(.*)?(PHPFUNC(.*)(\$1)(.*)PHPFUNC)(.*)?$/i', $command_text, $matches_2) === 1)
             {
                 // var_dump($matches_2);
-                
+
                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'nonsafe command requires to execute command WITH argument: ' . $command_text );
                 $run_with_argument = TRUE;
             }
@@ -1756,7 +1756,7 @@ class IzyBot {
                 $final_command_text = preg_replace('/\$1/', '"' . $command_argument . '"', $matches[3]);
 
                 // var_dump($final_command_text);
-                
+
                 $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'nonsafe command to eval: ' . '$ret_text = ' . $final_command_text . ';' );
                 eval('$ret_text = ' . $final_command_text . ';');
                 return $matches[1] . $ret_text . $matches[4];
@@ -1777,8 +1777,8 @@ class IzyBot {
 
         // check if command expects arguments or not:
         // if (preg_match('/^(.*)?(PHPFUNC\(\$1\)PHPFUNC)(.*)?$/i', $command_text, $matches) === 1)
-        // if (preg_match('/^(.*)?(PHPFUNC(.*)\(\$1\)(.*)PHPFUNC)(.*)?$/i', $command_text, $matches) === 1)        
-  
+        // if (preg_match('/^(.*)?(PHPFUNC(.*)\(\$1\)(.*)PHPFUNC)(.*)?$/i', $command_text, $matches) === 1)
+
     }
     //----------------------------------------------------------------------------------
     //
@@ -1828,9 +1828,9 @@ class IzyBot {
         if ($this->giveaway_currently_enabled === TRUE)
         {
             $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'adding the viewer: ' . $username . ' to the giveaway');
-        
+
             $this->giveaway_viewers_list[] = $username;
-        
+
             $this->giveaway_viewers_list = array_unique($this->giveaway_viewers_list);
         }
         // $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'giveaway users list:' . "\n\n" . print_r($this->giveaway_viewers_list, true) . "\n\n");
@@ -1844,16 +1844,16 @@ class IzyBot {
         if ($this->giveaway_currently_enabled === TRUE)
         {
            $giveaway_uptime = timespan($this->giveaway_start_time);
-           
-           $viewers_count = (is_array($this->giveaway_viewers_list)) ? count($this->giveaway_viewers_list) : 0;           
+
+           $viewers_count = (is_array($this->giveaway_viewers_list)) ? count($this->giveaway_viewers_list) : 0;
 
            $viewers = ($viewers_count === 1) ? 'viewer' : 'viewers';
-           
+
            $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : Giveaway is currently running for ' . $giveaway_uptime . ', ' . $viewers_count . ' ' . $viewers . ' have joined it.');
 
            $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'giveaway users list:' . "\n\n" . print_r($this->giveaway_viewers_list, true) . "\n\n");
         }
-        else 
+        else
         {
            $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : No giveaway is currently running.');
         }
@@ -1887,7 +1887,7 @@ class IzyBot {
             $rand_elements = array_rand($this->giveaway_viewers_list, 1);
             $giveaway_winner_current = $this->giveaway_viewers_list[$rand_elements];
             $this->giveaway_winners_list[] = $giveaway_winner_current;
-            
+
             $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'picked up give away winner: ' . $giveaway_winner_current );
 
             $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : Giveaway winner randomly picked: ' . $giveaway_winner_current . ', congrats!');
@@ -1936,7 +1936,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _read_loyalty_viewers_XP_array()
     {
@@ -1958,7 +1958,7 @@ class IzyBot {
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Loyalty viewers XP loaded.');
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _check_and_query_loyalty_URL()
     {
@@ -1972,7 +1972,7 @@ class IzyBot {
 
 
             $tmi_twitch_url = 'https://tmi.twitch.tv/group/user/' . $this->bot_config['channel'] . '/chatters';
-            
+
             $chatters_web_response = \IZYBOT\lib\retrieve_web_page($tmi_twitch_url, 'TRUE');
 
             if ($chatters_web_response[1] === FALSE)
@@ -1992,9 +1992,9 @@ class IzyBot {
                 $check_was_successful = FALSE;
                 GOTO ENDOFCHATTERSQUERYPROCESSING;
             }
-            
+
             $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Twitch response reports there are: ' . $json_response['chatter_count'] . ' people in the chat');
-            
+
             //-----
             $viewers_in_json = array();
 
@@ -2025,11 +2025,11 @@ class IzyBot {
             {
                 $this->_add_loyalty_XP_to_user($username);
             }
-            // 
+            //
             // uasort($this->loyalty_viewers_XP_array, array($this, '_username_sort_array'));
-            // 
+            //
             // $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'After Twitch response, loyalty_viewers_XP_array is: ' . "\n\n" . print_r($this->loyalty_viewers_XP_array, TRUE) . "\n\n");
-            
+
             // write to file:
             $this->_write_loyalty_viewers_XP();
             $check_was_successful = TRUE;
@@ -2045,7 +2045,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _add_loyalty_XP_to_user($username)
     {
@@ -2066,7 +2066,7 @@ class IzyBot {
         {
             // username already exists:
             // $this->logger->log_it('DEBUG', __CLASS__, __FUNCTION__, 'Username: ' . $username . ' was found.');
-            
+
             $points_before = $this->loyalty_viewers_XP_array[$key_for_username]['points'];
 
             $this->loyalty_viewers_XP_array[$key_for_username] = array( 'username' => $username,
@@ -2078,7 +2078,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _display_loyalty_XP_of_viewer($username)
     {
@@ -2095,7 +2095,7 @@ class IzyBot {
             // username exists:
             $loyalty_XP = $this->loyalty_viewers_XP_array[$key_for_username]['points'];
         }
-        
+
         $loyalty_currency_single_plural = ($loyalty_XP > 1 || $loyalty_XP === 0) ? $this->loyalty_currency : $this->loyalty_currency;
 
         $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : ' . $username . ' has ' . $loyalty_XP . ' ' . $loyalty_currency_single_plural . '.');
@@ -2103,7 +2103,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _username_sort_array($a, $b) {
         if ($a == $b) {
@@ -2112,12 +2112,12 @@ class IzyBot {
         return ($a < $b) ? -1 : 1;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _bot_command_add_usage($bot_command)
     {
         $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Adding usage for bot command: ' . $bot_command);
-        
+
         if (array_key_exists($bot_command, $this->bot_commands_usage) !== FALSE)
         {
             $this->bot_commands_usage[$bot_command]++;
@@ -2128,7 +2128,7 @@ class IzyBot {
         }
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _cancel_bet()
     {
@@ -2158,7 +2158,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _start_bet($username, $channel, $words_in_message_text, $message_text)
     {
@@ -2168,7 +2168,7 @@ class IzyBot {
             $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : Cannot start a bet, there is already an active one.');
         }
         else
-        {            
+        {
             if (count($words_in_message_text) < 3)
             {
                 $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : To start a bet, use: ' . $this->bot_config['admin_startbet_keyword'] . ' <duration in seconds to accept bets> <bet description>');
@@ -2197,7 +2197,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _end_bet($username, $channel, $words_in_message_text, $message_text)
     {
@@ -2219,7 +2219,7 @@ class IzyBot {
                 {
                     $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
                     if (!in_array($words_in_message_text[1], $bet_possible_options)) {
-                        $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option), rejecting it.');
+                        $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option: 12,13,14,15,16,23,24,25,26,34,35,36,45,46,56), rejecting it.');
                     }else{
                         $this->bet_winning_option = $words_in_message_text[1];
 
@@ -2296,16 +2296,16 @@ class IzyBot {
                     $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : To end the bet, you need to provide the winning option in numerical format.' );
                 }
             }
-            
+
         }
 
         //
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
-    private function _write_bet_results($bet_status, 
+    private function _write_bet_results($bet_status,
     $stats_total_bets = 'N/A',
     $stats_winners_total = 'N/A',
     $stats_losers_total = 'N/A',
@@ -2327,7 +2327,7 @@ class IzyBot {
             'Bets' => $this->bets_array,
             'Bet start date' => $this->bet_start_time,
             'Bet end date' => $this->bet_end_time,
-            'Bet winning option' => $this->bet_winning_option            
+            'Bet winning option' => $this->bet_winning_option
         );
 
         $this->appdatahandler->WriteAppDatafile($bet_results_file, 'bets', json_encode($bet_results_array), 'WRITE');
@@ -2336,7 +2336,7 @@ class IzyBot {
         return TRUE;
     }
     //----------------------------------------------------------------------------------
-    // 
+    //
     //----------------------------------------------------------------------------------
     private function _register_bet($username, $channel, $words_in_message_text, $message_text)
     {
@@ -2354,7 +2354,7 @@ class IzyBot {
                 $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
                 if (!in_array($words_in_message_text[1], $bet_possible_options)) {
                     //$this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
-                    $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option), rejecting it.');
+                    $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option: 12,13,14,15,16,23,24,25,26,34,35,36,45,46,56), rejecting it.');
                     return FALSE;
                 }
             }
