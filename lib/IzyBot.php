@@ -2190,7 +2190,7 @@ class IzyBot {
                 $this->bet_description = implode(' ', array_slice($words_in_message_text, 1));
                 $this->bet_start_time = date('U');
                 //
-                $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : ' . $this->bot_config['betstart_announcement_message'] . ': ' . implode(' ', array_slice($words_in_message_text, 2)) . ' for the next ' . $words_in_message_text[1] . ' seconds. To vote type: ' . $this->bot_config['bet_place_keyword'] . ' followed by the option of your choice and the amount you want to bet. For example: ' . $this->bot_config['bet_place_keyword'] . ' 2 400');
+                $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : ' . $this->bot_config['betstart_announcement_message'] . ': ' . implode(' ', array_slice($words_in_message_text, 2)) . ' for the next ' . $words_in_message_text[1] . ' seconds. To vote type: ' . $this->bot_config['bet_place_keyword'] . ' followed by the option of your choic (12,13,14,15,16,23,24,25,26,34,35,36,45,46,56) and the amount you want to bet (max 1000). For example: ' . $this->bot_config['bet_place_keyword'] . ' 12 400');
             }
         }
         //
@@ -2208,7 +2208,6 @@ class IzyBot {
         }
         else
         {
-            //TODO CHECKER LE RESULTAT
             if (count($words_in_message_text) === 1)
             {
                 $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : To end the bet, type: ' . $this->bot_config['admin_endbet_keyword'] . ' <winning option in numerical format>');
@@ -2219,7 +2218,7 @@ class IzyBot {
                 {
                     $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
                     if (!in_array($words_in_message_text[1], $bet_possible_options)) {
-                        $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option: 12,13,14,15,16,23,24,25,26,34,35,36,45,46,56), rejecting it.');
+                        $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', !endbet command is malformed, rejecting it.');
                     }else{
                         $this->bet_winning_option = $words_in_message_text[1];
 
@@ -2251,7 +2250,6 @@ class IzyBot {
                             if ($bet['option'] === $this->bet_winning_option)
                             {
                                 $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + $bet['amount'];
-                                //$this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + ($bet['amount']*2);
                                 $stats_winners_total++;
                                 $stats_total_bet_won_amount += $bet['amount'];
                                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she WON: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
@@ -2345,20 +2343,25 @@ class IzyBot {
             $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Processing vote from user: ' . $username);
             if (count($words_in_message_text) != 3)
             {
+                $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed. To vote type: ' . $this->bot_config['bet_place_keyword'] . ' followed by the option of your choic (12,13,14,15,16,23,24,25,26,34,35,36,45,46,56) and the amount you want to bet (max 1000). For example: ' . $this->bot_config['bet_place_keyword'] . ' 12 400');
                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed, rejecting it.');
                 return FALSE;
             }
             //
+            $betting_option = $words_in_message_text[1];
+
             if (preg_match('/^[0-9]+$/', $words_in_message_text[1], $matches) != 1)
             {
+                $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed. To vote type: ' . $this->bot_config['bet_place_keyword'] . ' followed by the option of your choic (12,13,14,15,16,23,24,25,26,34,35,36,45,46,56) and the amount you want to bet (max 1000). For example: ' . $this->bot_config['bet_place_keyword'] . ' 12 400');
+                return FALSE;
+            }else{
                 $bet_possible_options = array('12', '13', '14','15', '16', '23', '24', '25', '26', '34', '35', '36', '45', '46', '56');
-                if (!in_array($words_in_message_text[1], $bet_possible_options)) {
+                if (!in_array($betting_option, $bet_possible_options)) {
                     //$this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Request is malformed (not numeric option), rejecting it.');
-                    $this->logger->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed (not numeric option: 12,13,14,15,16,23,24,25,26,34,35,36,45,46,56), rejecting it.');
+                    $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', Bet is malformed. To vote type: ' . $this->bot_config['bet_place_keyword'] . ' followed by the option of your choic (12,13,14,15,16,23,24,25,26,34,35,36,45,46,56) and the amount you want to bet (max 1000). For example: ' . $this->bot_config['bet_place_keyword'] . ' 12 400');
                     return FALSE;
                 }
             }
-            $betting_option = $words_in_message_text[1];
             //
             if (preg_match('/^[0-9]+$/', $words_in_message_text[2], $matches) != 1)
             {
@@ -2411,6 +2414,8 @@ class IzyBot {
                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Requested: ' . $betting_amount . ', has: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points'] . '. bet was placed.');
                 // no response to user
             }
+        }else{
+            $this->send_text_to_server('bot', 'PRIVMSG ' . $this->channel . ' : @' . $username . ', There is no active bet for now');
         }
         //
         return TRUE;
