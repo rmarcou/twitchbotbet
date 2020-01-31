@@ -16,6 +16,7 @@ require_once(APPPATH . '/lib/Common.php');
 require_once(APPPATH . '/lib/Logger.php');
 require_once(APPPATH . '/lib/IzyBot.php');
 require_once(APPPATH . '/lib/AppDataHandler.php');
+require_once(APPPATH . '/lib/TwitchAPI.php');
 
 // require any potential plugins that reside on plugins folder:
 
@@ -37,5 +38,5 @@ date_default_timezone_set($config['timezone']);
 $twitch_bot = new IZYBOT($config);
 
 $twitch_bot->start_bot()
-           ->main()
-           ->stop_bot();
+    ->main()
+    ->stop_bot();
