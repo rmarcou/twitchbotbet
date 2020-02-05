@@ -2497,28 +2497,28 @@ class IzyBot {
                             $stats_total_bet_amount += $bet['amount'];
                             $stats_total_bets++;
 
-                            $key_for_username = array_search($username, array_column($this->loyalty_viewers_XP_array, 'username'));
-                            if ($key_for_username === FALSE)
-                            {
-                                $this->logger->log_it('ERROR', __CLASS__, __FUNCTION__, 'Could not process the bet for username: ' . $username . ', username not found in loyalty points array (shouldnt have happened!).');
-                                GOTO ENDOFBETPROCESSINGLOOP;
-                            }
-                            //
                             if ($bet['option'] === $this->bet_winning_option)
                             {
+                                //username
+                                //$bet['username']
+                                $key_for_username = array_search($bet['username'], array_column($this->loyalty_viewers_XP_array, 'username'));
+
                                 $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] + $bet['amount'];
+
                                 $stats_winners_total++;
                                 $stats_total_bet_won_amount += $bet['amount'];
                                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she WON: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
                             }
                             else
                             {
+                                $key_for_username = array_search($bet['username'], array_column($this->loyalty_viewers_XP_array, 'username'));
+
                                 $this->loyalty_viewers_XP_array[$key_for_username]['points'] = $this->loyalty_viewers_XP_array[$key_for_username]['points'] - $bet['amount'];
+
                                 $stats_losers_total++;
                                 $stats_total_bet_lost_amount += $bet['amount'];
                                 $this->logger->log_it('INFO', __CLASS__, __FUNCTION__, 'Bet processed for username: ' . $username . ', he/she LOST: ' . $bet['amount'] . ', new LP amount: ' . $this->loyalty_viewers_XP_array[$key_for_username]['points']);
                             }
-                            ENDOFBETPROCESSINGLOOP:
                         }
                         $bet_single_plural = ($stats_total_bets > 1 || $stats_total_bets === 0) ? 'bets' : 'bet';
                         $winners_single_plural = ($stats_winners_total > 1 || $stats_winners_total === 0) ? 'winners' : 'winner';
